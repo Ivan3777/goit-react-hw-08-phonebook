@@ -30,6 +30,7 @@ export const logIn = createAsyncThunk(
     try {
       const res = await axios.post('/users/login', credentials);
       setAuthHeader(res.data.token);
+
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -47,7 +48,7 @@ export const logOut = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
 });
 
 export const refreshUser = createAsyncThunk(
-    'auth/current',
+  'auth/refresh',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState();
     const persistedToken = state.auth.token;

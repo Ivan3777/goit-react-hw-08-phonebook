@@ -1,31 +1,42 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { getIsLoading, getFilteredContacts } from 'redux/contacts/selectors';
-import { useEffect } from 'react';
-import { fetchContacts } from 'redux/contacts/operations';
-import { ContactListItem } from './ContactListItem';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { delContact } from 'redux/contacts/operations';
+import { getContacts, getFilter } from 'redux/contacts/selectors';
 import css from './ContactList.module.css';
 
-export const ContactList = () => {
-  const dispatch = useDispatch();
-  const contacts = useSelector(getFilteredContacts);
-  const isLoading = useSelector(getIsLoading);
+const getVisibleContacts = (contacts, filter) => {
+  if (!filter) {
+    return contacts;
+  } else {
+    return contacts.filter(contact => {
+      return contact.name.toLowerCase().includes(filter.toLowerCase());
+    });
+  }
+};
 
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
+export const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const visibleContacts = getVisibleContacts(contacts, filter);
+
+  const dispatch = useDispatch();
+  const handleDelete = id => dispatch(delContact(id));
 
   return (
     <div className={css.wraperContactList}>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <ul className={css.contactList}>
-          {contacts.map((contact, id) => (
-            <ContactListItem key={id} contact={contact}/>
-          ))}
-        </ul>
-      )}
+      <ul className={css.contactList}>
+        {visibleContacts.map((contact, id) => (
+          <li key={id} className={css.contactListItem}>
+            {contact.name}: {contact.number}
+            <button
+              type="button"
+              className={css.contactListItemBtn}
+              onClick={() => handleDelete(contact.id)}
+            >
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
